@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Churn Model v{{ "%04d"|format(version) }}</title>
+<style>{{ css }}</style>
+</head>
+<body>
+<main>
+  <h1>Churn model v{{ "%04d"|format(version) }}</h1>
+  <p class="sub">Trained {{ trained_at }} &middot; {{ rows.train|thousands }} training rows from {{ split.train|length }} snapshots &middot;
+    tested out of time on weeks {{ split.test|join(", ") }} &middot; {{ promotion.reason }}</p>
+
+  <div class="tiles">
+    <div class="tile"><div class="label">Test ROC AUC</div><div class="value">{{ "%.3f"|format(test.roc_auc) }}</div>
+      <div class="note">ranking quality</div></div>
+    <div class="tile"><div class="label">Test average precision</div><div class="value">{{ "%.3f"|format(test.average_precision) }}</div>
+      <div class="note">base rate {{ "%.1f%%"|format(100 * test.positive_rate) }}</div></div>
+    <div class="tile"><div class="label">Lift in top 10%</div><div class="value">{{ "%.1f×"|format(test.lift_at_10pct) }}</div>
+      <div class="note">vs random targeting</div></div>
+    <div class="tile"><div class="label">Calibration error (ECE)</div><div class="value">{{ "%.3f"|format(test.ece) }}</div>
+      <div class="note">Brier {{ "%.4f"|format(test.brier) }}</div></div>
+    <div class="tile"><div class="label">Campaign profit (test)</div><div class="value">${{ test.campaign_profit|thousands }}</div>
+      <div class="note">target-all: ${{ test.profit_if_target_all|thousands }}</div></div>
+    <div class="tile"><div class="label">Customers targeted</div><div class="value">{{ test.customers_targeted|thousands }}</div>
+      <div class="note">threshold {{ "%.3f"|format(test.threshold) }}, recall {{ "%.0f%%"|format(100 * test.recall) }}</div></div>
+  </div>
+
+  <h2>Model leaderboard</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Model</th><th>Blend weight</th><th>Val {{ tuning_metric }}</th><th>Val ROC AUC</th>
+      <th>Test ROC AUC</th><th>Test avg precision</th><th>Trials</th><th>Tuning (s)</th><th>Final fit (s)</th></tr></thead>
+    <tbody>
+    {% for row in leaderboard %}
+      <tr class="{{ 'best' if row.model == 'final model' else '' }}">
+        <td>{{ labels.get(row.model, row.model) }}</td>
+        <td>{{ "%.2f"|format(row.weight) if row.weight is not none else "&ndash;"|safe }}</td>
+        <td>{{ "%.4f"|format(row.val_score) if row.val_score is not none else "&ndash;"|safe }}</td>
+        <td>{{ "%.4f"|format(row.val_roc_auc) }}</td><td>{{ "%.4f"|format(row.test_roc_auc) }}</td>
+        <td>{{ "%.4f"|format(row.test_average_precision) }}</td>
+        <td>{{ row.trials if row.trials is not none else "&ndash;"|safe }}</td>
+        <td>{{ "%.0f"|format(row.tune_seconds) if row.tune_seconds is not none else "&ndash;"|safe }}</td>
+        <td>{{ "%.1f"|format(row.fit_seconds) if row.fit_seconds is not none else "&ndash;"|safe }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+
+  <h2>Discrimination</h2>
+  <div class="grid2">
+    <figure><img src="{{ charts.roc }}" alt="ROC curves for every model on the test set"></figure>
+    <figure><img src="{{ charts.pr }}" alt="Precision-recall curves for every model on the test set"></figure>
+  </div>
+
+  <h2>Calibration and targeting</h2>
+  <div class="grid2">
+    <figure><img src="{{ charts.calibration }}" alt="Reliability diagram before and after calibration"></figure>
+    <figure><img src="{{ charts.gains }}" alt="Cumulative gains curve"></figure>
+  </div>
+
+  <h2>Business decision</h2>
+  <p class="sub">An offer costs ${{ business.offer_cost }}; it saves {{ "%.0f%%"|format(100 * business.retention_success_rate) }} of the churners it reaches,
+    each worth {{ business.months_of_value }} months of their current charge. The threshold that maximizes profit on the validation period is applied to the test period.</p>
+  <div class="grid2">
+    <figure><img src="{{ charts.profit_val }}" alt="Profit versus share targeted, validation"></figure>
+    <figure><img src="{{ charts.profit_test }}" alt="Profit versus share targeted, test"></figure>
+  </div>
+
+  {% if charts.importance %}
+  <h2>Explainability</h2>
+  <div class="grid2">
+    <figure><img src="{{ charts.importance }}" alt="Global SHAP feature importance"></figure>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Feature</th><th>Mean |SHAP|</th></tr></thead>
+      <tbody>{% for name, value in importance %}<tr><td>{{ name }}</td><td>{{ "%.4f"|format(value) }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </div>
+  {% endif %}
+
+  <h2>Data</h2>
+  <figure><img src="{{ charts.over_time }}" alt="Churn rate per snapshot week"></figure>
+  <div class="table-wrap" style="margin-top:16px"><table>
+    <thead><tr><th>Split</th><th>Snapshot weeks</th><th>Rows</th><th>Churn rate</th></tr></thead>
+    <tbody>
+      {% for name in ["train", "validation", "test"] %}
+      <tr><td>{{ name }}</td><td>{{ split[name]|join(", ") }}</td><td>{{ rows[name]|thousands }}</td>
+        <td>{{ "%.2f%%"|format(100 * rates[name]) }}</td></tr>
+      {% endfor %}
+      {% if split.embargoed %}<tr><td>embargoed</td><td>{{ split.embargoed|join(", ") }}</td><td colspan="2">dropped: their label windows overlap the next period</td></tr>{% endif %}
+    </tbody>
+  </table></div>
+
+  <h2>Best hyperparameters</h2>
+  <pre>{{ params_json }}</pre>
+
+  <footer>churn-ml {{ package_version }} &middot; run {{ run_id }}</footer>
+</main>
+</body>
+</html>

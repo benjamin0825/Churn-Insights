@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.14"]  # the bundled native engine targets CPython 3.14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[dev]"
+          python scripts/build_native.py --if-present
+      - name: Lint
+        run: |
+          ruff check src tests
+          ruff format --check src tests
+      - name: Unit tests (default backend)
+        run: pytest -m "not slow"
+      - name: Unit tests (NumPy backend)
+        run: pytest -m "not slow"
+        env:
+          CHURN_ML_KERNELS: numpy
+      - name: End-to-end tests (trains real models on the fast profile)
+        run: pytest -m slow
+      - name: Smoke-run the CLI pipeline
+        run: churn-ml -c fast --set paths.artifacts=/tmp/churn pipeline

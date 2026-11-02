@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0088ff"/><stop offset="1" stop-color="#00b4ff"/></linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#1a1a1a"/>
+  <g transform="translate(7 15.5) scale(0.0397)">
+    <path fill="#fff" d="M0 0H520L601 145L499 321L416 179H305L443 420L341 598Z"/>
+    <path fill="#fff" d="M1260 0H740L659 145L761 321L844 179H955L817 420L919 598Z"/>
+    <path fill="url(#g)" d="M630 192L892 645L790 823L630 548L470 823L368 645Z"/>
+  </g>
+</svg>

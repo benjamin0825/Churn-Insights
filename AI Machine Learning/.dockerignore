@@ -1,0 +1,12 @@
+.venv
+.git
+**/__pycache__
+.pytest_cache
+.ruff_cache
+artifacts
+*.egg-info
+build
+src/churn_ml/_kernels_ext*.pyd
+src/churn_ml/_kernels_ext*.so
+src/churn_ml/*.lib
+src/churn_ml/_kernels_ext.c

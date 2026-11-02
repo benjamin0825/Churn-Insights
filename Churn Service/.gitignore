@@ -1,0 +1,12 @@
+# Python
+backend/.venv/
+__pycache__/
+.pytest_cache/
+
+# Runtime data: database, secret key, per-organization files
+backend/data/
+backend/.env
+
+# Frontend
+frontend/node_modules/
+frontend/dist/

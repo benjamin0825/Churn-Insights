@@ -1,0 +1,86 @@
+# Full-scale configuration. Every value can be overridden from the CLI:
+#   churn-ml train --set tuning.n_trials.lightgbm=50 --set simulation.n_customers=20000
+
+project:
+  name: churn-ml
+  seed: 42
+
+paths:
+  artifacts: artifacts          # relative to the project root
+
+simulation:
+  n_customers: 10000            # customers already on the books at week 0
+  new_customers_per_week: 60
+  n_weeks: 104                  # two years of weekly history
+  start_date: "2024-01-01"
+  drift:                        # a competitor launch that only shows up in the newest data
+    enabled: true
+    start_week: 98
+    region: west
+    satisfaction_shock: 0.08    # weekly satisfaction loss in the affected region
+    usage_drop: 0.30
+
+labeling:
+  horizon_weeks: 8              # label = churns within the next 8 weeks (~60 days)
+  first_snapshot_week: 28       # leaves 26 weeks of history for the longest look-backs
+  snapshot_every_weeks: 4
+
+features:
+  windows_weeks: [4, 12]
+  text_window_weeks: 12
+  tfidf_max_features: 3000
+  svd_components: 16
+
+split:
+  validation_snapshots: 2       # newest labelled snapshots are held out in time order
+  test_snapshots: 2
+
+models:
+  enabled: [logistic_regression, random_forest, lightgbm, xgboost, tabular_nn]
+
+tuning:
+  metric: average_precision     # or roc_auc
+  sample_rows: 60000            # trials train on a subsample; the final fit uses all rows
+  timeout_seconds: 1800         # per model
+  storage: sqlite:///{artifacts}/optuna.db
+  n_trials:
+    logistic_regression: 10
+    random_forest: 8
+    lightgbm: 30
+    xgboost: 20
+    tabular_nn: 8
+
+ensemble:
+  enabled: true
+  top_k: 3
+
+calibration:
+  method: isotonic              # isotonic | sigmoid | none
+
+business:
+  offer_cost: 15.0              # cost of a retention offer per targeted customer
+  retention_success_rate: 0.35  # share of true churners the offer saves
+  months_of_value: 12           # value of a saved customer = monthly charge x this
+
+registry:
+  auto_promote: true
+  tolerance: 0.005              # challenger may trail the champion by at most this ROC AUC
+
+monitoring:
+  psi_warning: 0.10
+  psi_alert: 0.25
+  reference_sample: 20000
+  segment_column: region        # also profile drift per region; null to disable
+
+explain:
+  background_rows: 2000
+  top_reasons: 5
+
+tracking:
+  enabled: true
+  uri: sqlite:///{artifacts}/mlflow.db
+  experiment: churn-ml
+
+serving:
+  host: 127.0.0.1
+  port: 8000

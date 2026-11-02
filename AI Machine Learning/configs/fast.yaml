@@ -1,0 +1,33 @@
+# Small, quick profile for smoke tests and development (about a minute end to end).
+# Values here are merged over default.yaml.
+
+simulation:
+  n_customers: 2500
+  new_customers_per_week: 10
+  n_weeks: 80
+  drift:
+    start_week: 74
+
+features:
+  tfidf_max_features: 500
+  svd_components: 8
+
+tuning:
+  sample_rows: 15000
+  timeout_seconds: 120
+  storage: null
+  n_trials:
+    logistic_regression: 2
+    random_forest: 2
+    lightgbm: 4
+    xgboost: 3
+    tabular_nn: 2
+
+calibration:
+  method: sigmoid               # the small validation set makes isotonic steps jumpy
+
+explain:
+  background_rows: 300
+
+tracking:
+  enabled: false

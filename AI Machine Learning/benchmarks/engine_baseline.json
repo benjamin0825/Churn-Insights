@@ -1,0 +1,20 @@
+{
+  "description": "Speed-ups of the bundled native engine (churn_ml._native) over the NumPy kernels on the churn_ml.kernel_bench workloads.",
+  "speedup_vs_numpy": {
+    "group_stats": 7.45,
+    "group_last": 10.2,
+    "group_max_where": 1.97,
+    "group_category_counts": 8.84,
+    "group_join": 1.46,
+    "binned_frequencies": 1.83,
+    "feature_build": 1.39
+  },
+  "overall_speedup_vs_numpy": 3.37,
+  "measured_on": {
+    "platform": "Windows AMD64",
+    "python": "3.14.8",
+    "cpu_count": 12,
+    "date": "2026-10-16",
+    "repeat": 5
+  }
+}

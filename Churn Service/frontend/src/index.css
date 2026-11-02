@@ -1,0 +1,234 @@
+@import 'tailwindcss';
+
+/* Design tokens: light gray canvas, white shadowed cards, navy ink, WSL brand blue accent.
+   Dark mode has its own tuned steps (not an inversion). */
+:root {
+  color-scheme: light;
+  --page: #f5f6fa;
+  --surface: #ffffff;
+  --surface-2: #f3f4f9;
+  --ink: #2d3047;
+  --ink-2: #5f6485;
+  --muted: #9095b2;
+  --hairline: #eceef5;
+  --axis: #d9dcea;
+  --accent: #0a6cf0;
+  --accent-ink: #ffffff;
+  --accent-soft: #e8f1fe;
+  --series-1: #0a6cf0;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --good: #12b76a;
+  --warning: #f5a524;
+  --serious: #ec835a;
+  --critical: #e5484d;
+  --good-ink: #0b8f50;
+  --warning-ink: #9a6200;
+  --critical-ink: #cf2f37;
+  --good-soft: #e3f7ec;
+  --critical-soft: #fdeaea;
+  --shadow: 0 1px 2px rgb(23 26 56 / 0.04), 0 2px 6px rgb(23 26 56 / 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) {
+    color-scheme: dark;
+    --page: #10121c;
+    --surface: #191c2b;
+    --surface-2: #212538;
+    --ink: #e9eaf3;
+    --ink-2: #b4b8d0;
+    --muted: #8a8fab;
+    --hairline: #262a3e;
+    --axis: #33384f;
+    --accent: #1f7dff;
+    --accent-soft: #10264a;
+    --series-1: #3d95ff;
+    --good-ink: #3dd68c;
+    --warning-ink: #f5b84a;
+    --critical-ink: #ff6b6f;
+    --good-soft: #163327;
+    --critical-soft: #3a1d22;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --page: #10121c;
+  --surface: #191c2b;
+  --surface-2: #212538;
+  --ink: #e9eaf3;
+  --ink-2: #b4b8d0;
+  --muted: #8a8fab;
+  --hairline: #262a3e;
+  --axis: #33384f;
+  --accent: #1f7dff;
+  --accent-soft: #10264a;
+  --series-1: #3d95ff;
+  --good-ink: #3dd68c;
+  --warning-ink: #f5b84a;
+  --critical-ink: #ff6b6f;
+  --good-soft: #163327;
+  --critical-soft: #3a1d22;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-hairline: var(--hairline);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-good: var(--good);
+  --color-warning: var(--warning);
+  --color-critical: var(--critical);
+  --color-good-ink: var(--good-ink);
+  --color-warning-ink: var(--warning-ink);
+  --color-critical-ink: var(--critical-ink);
+  --color-good-soft: var(--good-soft);
+  --color-critical-soft: var(--critical-soft);
+  --shadow-card: var(--shadow);
+  --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Recharts: text uses ink tokens, never series colors */
+.recharts-cartesian-axis-tick-value {
+  fill: var(--muted);
+  font-size: 11px;
+}
+.recharts-cartesian-grid line {
+  stroke: var(--hairline);
+}
+.recharts-tooltip-wrapper {
+  outline: none;
+}
+
+/* Marketing site motion: gentle floating cards and fade-up on scroll. Off for reduced motion. */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-float-slow { animation: float 8s ease-in-out infinite; animation-delay: -3s; }
+
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.is-visible { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float, .animate-float-slow { animation: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* Brand gradient text; the animated variant slowly shimmers. */
+.text-gradient {
+  background-image: linear-gradient(90deg, #3d9bff 0%, #00c2ff 50%, #3d9bff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@keyframes shimmer { to { background-position: 200% center; } }
+.text-gradient-animated { animation: shimmer 6s linear infinite; }
+
+/* Hero glows drift slowly. */
+@keyframes drift {
+  0%, 100% { transform: translate(-50%, 0) scale(1); }
+  50% { transform: translate(-46%, 30px) scale(1.08); }
+}
+@keyframes drift-side {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(60px, -40px); }
+}
+.glow-drift { animation: drift 14s ease-in-out infinite; }
+.glow-drift-slow { animation: drift-side 18s ease-in-out infinite; }
+
+/* Charts draw themselves and bars grow once their card is revealed. Paths use pathLength="1". */
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes grow-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop-in { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: none; } }
+.draw-path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.is-visible .draw-path { animation: draw 1.8s ease-out 0.2s forwards; }
+.grow-x { transform-origin: left center; transform: scaleX(0); }
+.is-visible .grow-x { animation: grow-x 1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.3s forwards; }
+.is-visible .fade-in-late { animation: fade-in 0.8s ease 1s both; }
+.pop-in { animation: pop-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+/* Endless horizontal scroll. */
+@keyframes marquee { to { transform: translateX(calc(-50% - 1.5rem)); } }
+.marquee { mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent); }
+.marquee-track { animation: marquee 32s linear infinite; }
+
+/* Arrow nudges on hover. */
+.group:hover .nudge { transform: translateX(3px); }
+.nudge { transition: transform 0.2s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .text-gradient-animated, .glow-drift, .glow-drift-slow, .marquee-track, .pop-in { animation: none; }
+  .draw-path { stroke-dasharray: none; stroke-dashoffset: 0; }
+  .grow-x { transform: none; }
+  .is-visible .draw-path, .is-visible .grow-x, .is-visible .fade-in-late { animation: none; }
+}
+
+/* Tilt cards: smooth return and a light that follows the cursor. */
+.tilt { position: relative; transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1); transform-style: preserve-3d; }
+.tilt::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+  background: radial-gradient(420px circle at var(--glow-x, 50%) var(--glow-y, 50%), rgb(10 108 240 / 0.10), transparent 60%);
+}
+.tilt:hover::after { opacity: 1; }
+
+/* A light sweep across primary buttons. */
+@keyframes shine { 0% { transform: translateX(-120%) skewX(-20deg); } 60%, 100% { transform: translateX(220%) skewX(-20deg); } }
+.shine { position: relative; overflow: hidden; isolation: isolate; }
+.shine::after {
+  content: ''; position: absolute; inset: 0; width: 40%; z-index: -1; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.35), transparent);
+  animation: shine 3.6s ease-in-out infinite;
+}
+
+/* The four steps light up one after another, on a loop. */
+@keyframes step-glow {
+  0%, 70%, 100% { box-shadow: 0 12px 30px -8px rgb(10 108 240 / 0.6); transform: scale(1); }
+  15% { box-shadow: 0 0 0 8px rgb(10 108 240 / 0.18), 0 16px 40px -6px rgb(10 108 240 / 0.9); transform: scale(1.08); }
+}
+.step-glow { animation: step-glow 6s ease-in-out infinite; }
+
+/* Live feed items slide in from the top. */
+@keyframes feed-in { from { opacity: 0; transform: translateY(-14px) scale(0.97); } to { opacity: 1; transform: none; } }
+.feed-in { animation: feed-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tilt { transition: none; }
+  .shine::after, .step-glow, .feed-in { animation: none; }
+}

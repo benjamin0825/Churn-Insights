@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drift Report Week {{ week }}</title>
+<style>{{ css }}</style>
+</head>
+<body>
+<main>
+  <h1>Drift report, week {{ week }}</h1>
+  <p class="sub">Model v{{ "%04d"|format(version) }} &middot; {{ report.n_current|thousands }} current rows vs {{ report.n_reference|thousands }} training rows &middot;
+    overall status <span class="badge {{ report.status }}">{{ report.status }}</span></p>
+
+  <div class="tiles">
+    <div class="tile"><div class="label">Features with alerts</div><div class="value">{{ counts.alert }}</div><div class="note">PSI &ge; {{ alert }}</div></div>
+    <div class="tile"><div class="label">Features with warnings</div><div class="value">{{ counts.warning }}</div><div class="note">PSI &ge; {{ warning }}</div></div>
+    <div class="tile"><div class="label">Stable features</div><div class="value">{{ counts.stable }}</div><div class="note">of {{ report.features|length }}</div></div>
+    {% if report.prediction %}
+    <div class="tile"><div class="label">Prediction PSI</div><div class="value">{{ "%.3f"|format(report.prediction.psi) }}</div>
+      <div class="note"><span class="badge {{ report.prediction.status }}">{{ report.prediction.status }}</span>
+        mean {{ "%.3f"|format(report.prediction.reference_mean) }} &rarr; {{ "%.3f"|format(report.prediction.current_mean) }}</div></div>
+    {% endif %}
+  </div>
+
+  <h2>Most drifted features</h2>
+  <figure><img src="{{ chart }}" alt="PSI per feature with warning and alert thresholds"></figure>
+
+  {% if report.segments %}
+  <h2>Segment drift</h2>
+  <p class="sub">The same checks per segment: shocks that hit one segment can be invisible in the global numbers.</p>
+  {% if segment_chart %}<figure style="margin-bottom:16px"><img src="{{ segment_chart }}" alt="PSI per segment and feature"></figure>{% endif %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Segment</th><th>Feature</th><th>PSI</th><th>Reference mean</th><th>Current mean</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for row in report.segments[:20] %}
+      <tr><td>{{ row.segment }}</td><td>{{ "model prediction" if row.feature == "__prediction__" else row.feature }}</td>
+        <td>{{ "%.4f"|format(row.psi) }}</td>
+        <td>{{ "%.3f"|format(row.reference_mean) if row.reference_mean is not none else "&ndash;"|safe }}</td>
+        <td>{{ "%.3f"|format(row.current_mean) if row.current_mean is not none else "&ndash;"|safe }}</td>
+        <td><span class="badge {{ row.status }}">{{ row.status }}</span></td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% endif %}
+
+  <h2>All features</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Feature</th><th>Kind</th><th>PSI</th><th>KS p-value</th><th>Reference mean</th><th>Current mean</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for row in report.features %}
+      <tr><td>{{ row.feature }}</td><td>{{ row.kind }}</td><td>{{ "%.4f"|format(row.psi) }}</td>
+        <td>{{ "%.2g"|format(row.ks_pvalue) if row.ks_pvalue is not none else "&ndash;"|safe }}</td>
+        <td>{{ "%.3f"|format(row.reference_mean) if row.reference_mean is not none else "&ndash;"|safe }}</td>
+        <td>{{ "%.3f"|format(row.current_mean) if row.current_mean is not none else "&ndash;"|safe }}</td>
+        <td><span class="badge {{ row.status }}">{{ row.status }}</span></td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  <footer>churn-ml {{ package_version }}</footer>
+</main>
+</body>
+</html>

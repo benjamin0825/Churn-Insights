@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+artifacts/
+mlruns/
+*.db
+build/
+*.pdb
+
+# Compiled modules are build outputs (python scripts/build_native.py) ...
+*.pyd
+*.so
+*.lib
+src/churn_ml/_kernels_ext.c
+# ... except the bundled pre-built engine (CPython 3.14: Windows x64 + Linux x86_64)
+!src/churn_ml/_native/*.cp314-win_amd64.pyd
+!src/churn_ml/_native/*.cpython-314-x86_64-linux-gnu.so

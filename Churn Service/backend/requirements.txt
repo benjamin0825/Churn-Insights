@@ -1,0 +1,21 @@
+# Churn Service backend. Install with (Python 3.14):
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements.txt
+#
+# The ML platform (churn_ml) is installed from its repository; adjust the path or use a git URL:
+#   churn-ml @ git+https://github.com/<org>/<repo>.git
+-e "../../AI Machine Learning"
+
+fastapi>=0.110
+uvicorn>=0.27
+sqlalchemy>=2.0
+pydantic>=2.6
+pydantic-settings>=2.2
+email-validator>=2.1
+bcrypt>=4.1
+pyjwt>=2.8
+python-multipart>=0.0.9
+
+# tests
+pytest>=8
+httpx>=0.27
